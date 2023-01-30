@@ -1,10 +1,22 @@
 import React from 'react';
-import {Text, View} from 'react-native';
+import {View} from 'react-native';
+import ShopListComponent from '../../components/ShopList';
 
-export default function SignIn() {
+// Hooks
+import useShopList from './hooks/useShopList';
+
+export default function ShopList() {
+  const {products, confirmCheck, getAllProducts, refreshing} =
+    useShopList();
+
   return (
     <View>
-      <Text>ShopList</Text>
+      <ShopListComponent
+        refreshing={refreshing}
+        products={products}
+        refresh={getAllProducts}
+        onRemove={confirmCheck}
+      />
     </View>
   );
 }

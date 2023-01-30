@@ -1,21 +1,33 @@
-import instance from '../config/instance';
+import instance from '../_config/instance';
 
-export type GetTrendingsItemType = {
+export type AuthType = {
+  token: string;
+};
+
+export type GetUserType = {
   name: string;
-  title: string;
-  poster_path: string;
+  email: string;
 };
 
-export type GetTrendingsType = {
-  page: number;
-  results: GetTrendingsItemType[];
-};
-
-const getTrendings = (page = 1) =>
-  instance.get('trending/all/week', {
-    params: {
-      page,
-    },
+const signInRequest = (email: string, pass: string) =>
+  instance.post<AuthType>('auth/signin', {
+    email,
+    pass,
   });
 
-export {getTrendings};
+const signUpRequest = (name: string, email: string, pass: string) =>
+  instance.put<AuthType>('auth/signUp', {
+    name,
+    email,
+    pass,
+  });
+
+const validateToken = async () => {
+  return instance.get('auth/validateToken');
+};
+
+const getUserRequest = async () => {
+  return instance.get<GetUserType>('auth/getUser');
+};
+
+export {signInRequest, signUpRequest, validateToken, getUserRequest};

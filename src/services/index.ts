@@ -1,2 +1,2 @@
 export * from './auth';
-export * from './hooks/useAPI';
+export * from './products';

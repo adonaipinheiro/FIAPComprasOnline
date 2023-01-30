@@ -1,11 +1,14 @@
 import {useNavigation} from '@react-navigation/native';
-import type {RouterProp} from '../../../routes/types';
 import * as Yup from 'yup';
+import {Alert} from 'react-native';
+import {signInRequest} from '../../../services';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import type {RouterProp} from '../../../routes/types';
 
 export default function useSignIn() {
   const navigation = useNavigation<RouterProp>();
 
-  const initialValue = {email: '', pass: ''};
+  const initialValue = {email: 'admin@admin.com', pass: '123456'};
 
   const SigninSchema = Yup.object().shape({
     email: Yup.string()
@@ -19,17 +22,23 @@ export default function useSignIn() {
   }
 
   function logIn(
-    values: {
-      email: string;
-      pass: string;
-    },
+    values: typeof initialValue,
     setSubmitting: (submit: boolean) => void,
   ) {
-    navigation.reset({
-      index: 0,
-      routes: [{name: 'Logged'}],
-    });
-    setSubmitting(false);
+    signInRequest(values.email, values.pass)
+      .then(async resp => {
+        await AsyncStorage.setItem('@TOKEN', resp.data.token);
+        navigation.reset({
+          index: 0,
+          routes: [{name: 'Logged'}],
+        });
+      })
+      .catch(err => {
+        Alert.alert('Atenção', err.response?.data?.message);
+      })
+      .finally(() => {
+        setSubmitting(false);
+      });
   }
 
   return {

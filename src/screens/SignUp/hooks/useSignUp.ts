@@ -1,11 +1,18 @@
 import {useNavigation} from '@react-navigation/native';
 import type {RouterProp} from '../../../routes/types';
 import * as Yup from 'yup';
+import {signUpRequest} from '../../../services';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {Alert} from 'react-native';
 
 export default function useSignUp() {
   const navigation = useNavigation<RouterProp>();
 
-  const initialValue = {name: '', email: '', pass: ''};
+  const initialValue = {
+    name: 'Adonai Pinheiro',
+    email: 'adonai@fiap.com',
+    pass: '123456',
+  };
 
   const SignupSchema = Yup.object().shape({
     name: Yup.string().required('O campo não pode estar em branco'),
@@ -26,11 +33,20 @@ export default function useSignUp() {
     values: typeof initialValue,
     setSubmitting: (submit: boolean) => void,
   ) {
-    navigation.reset({
-      index: 0,
-      routes: [{name: 'Logged'}],
-    });
-    setSubmitting(false);
+    signUpRequest(values.name, values.email, values.pass)
+      .then(async resp => {
+        await AsyncStorage.setItem('@TOKEN', resp.data.token);
+        navigation.reset({
+          index: 0,
+          routes: [{name: 'Logged'}],
+        });
+      })
+      .catch(err => {
+        Alert.alert('Atenção', err.response?.data?.message);
+      })
+      .finally(() => {
+        setSubmitting(false);
+      });
   }
 
   return {
